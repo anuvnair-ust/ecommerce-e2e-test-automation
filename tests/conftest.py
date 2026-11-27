@@ -1,6 +1,7 @@
 import base64
 import re
 
+import allure
 import pytest
 from playwright.sync_api import Error as PlaywrightError, expect
 from pytest_html import extras
@@ -18,6 +19,11 @@ def pytest_configure(config):
 
 
 @pytest.fixture(scope="session")
+def browser_type_launch_args(browser_type_launch_args):
+    return {"headless": settings.HEADLESS, **browser_type_launch_args}
+
+
+@pytest.fixture(scope="session")
 def browser_context_args(browser_context_args):
     return {
         **browser_context_args,
@@ -30,6 +36,7 @@ def browser_context_args(browser_context_args):
 def context(browser, browser_context_args):
     context = browser.new_context(**browser_context_args)
     context.set_default_timeout(settings.UI_TIMEOUT_MS)
+    context.set_default_navigation_timeout(settings.NAVIGATION_TIMEOUT_MS)
     context.route("**/*", _filter_ad_requests)
     yield context
     context.close()
@@ -68,3 +75,5 @@ def pytest_runtest_makereport(item, call):
         extras.png(base64.b64encode(image).decode("ascii"), name="Screenshot"),
         extras.url(page.url, name="Failing URL"),
     ]
+    allure.attach(image, name="Screenshot", attachment_type=allure.attachment_type.PNG)
+    allure.attach(page.url, name="Failing URL", attachment_type=allure.attachment_type.URI_LIST)

@@ -82,10 +82,17 @@ pytest tests/api/test_account_api.py::test_delete_user_account
 
 Other markers: `smoke`, `regression`, `negative`.
 
-UI runs are headless Chromium by default. The usual pytest-playwright switches work:
+UI runs open a visible Chromium window on a local machine and are headless in CI (GitHub Actions sets
+`CI=true`). To run headless locally, set `AE_HEADLESS=true`:
+
+```powershell
+$env:AE_HEADLESS = "true"; pytest -m ui
+```
+
+The usual pytest-playwright switches work:
 
 ```bash
-pytest -m ui --headed --slowmo 300
+pytest -m ui --slowmo 300
 ```
 
 ```bash
@@ -101,7 +108,9 @@ environment variables:
 |------------------------|----------------------------------|-------------------------------------------------|
 | `AE_BASE_URL`          | `https://automationexercise.com` | UI base URL                                     |
 | `AE_API_BASE_URL`      | same as `AE_BASE_URL`            | API base URL                                    |
+| `AE_HEADLESS`          | `false` locally, `true` in CI    | Run the browser without a window                |
 | `AE_UI_TIMEOUT_MS`     | `15000`                          | Playwright action / assertion timeout           |
+| `AE_NAVIGATION_TIMEOUT_MS` | `45000`                      | Page load timeout                               |
 | `AE_API_TIMEOUT_S`     | `20`                             | Timeout for API calls                           |
 | `AE_OVERLOAD_RETRIES`  | `3`                              | Retries when the site answers "queue full"      |
 | `AE_OVERLOAD_WAIT_MS`  | `3000`                           | Base wait between those retries                 |
@@ -110,9 +119,20 @@ environment variables:
 
 ## Reports and screenshots
 
-- Every run writes a self-contained HTML report to `reports/report.html`.
-- When a UI test fails, a full-page screenshot is saved under `reports/screenshots/` and embedded in
-  the HTML report together with the URL the test was on.
+Every run writes three outputs under `reports/`:
+
+- `report.html` – self-contained pytest-html report
+- `results.xml` – JUnit XML
+- `allure-results/` – raw Allure results (cleared at the start of each run)
+
+When a UI test fails, a full-page screenshot is saved under `reports/screenshots/` and attached to
+both the pytest-html and the Allure report together with the URL the test was on.
+
+To open the Allure report locally (needs Node.js and Java):
+
+```bash
+npx allure-commandline serve reports/allure-results
+```
 
 ## What is covered
 
@@ -156,9 +176,15 @@ user lookup without an email.
 ## CI – GitHub Actions
 
 `.github/workflows/tests.yml` runs on pushes to `main`/`master`, on pull requests and on manual dispatch.
-It installs the requirements and Chromium, runs the API suite and the UI suite as separate steps and
-uploads the `reports/` folder (HTML reports, JUnit XML results + failure screenshots) as the `test-reports` artifact.
-The artifact is available from the **Artifacts** section of the workflow run.
+It installs the requirements and Chromium, runs the API suite and the UI suite as separate steps,
+builds a single-file Allure report from both and uploads the `reports/` folder as the `test-reports`
+artifact. The artifact is available from the **Artifacts** section of the workflow run and contains:
+
+- `api-report.html`, `ui-report.html` – pytest-html reports
+- `api-results.xml`, `ui-results.xml` – JUnit XML
+- `allure-report/index.html` – Allure report, opens directly in a browser
+- `allure-results/` – raw Allure results
+- `screenshots/` – only when a UI test failed
 
 ## Notes
 

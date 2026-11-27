@@ -30,11 +30,15 @@ jobs:
         run: python -m playwright install --with-deps chromium
 
       - name: Run API tests
-        run: pytest -m api --html=reports/api-report.html --self-contained-html --junitxml=reports/api-results.xml
+        run: pytest -m api --html=reports/api-report.html --self-contained-html --junitxml=reports/api-results.xml --alluredir=reports/allure-results/api
 
       - name: Run UI tests
         if: always()
-        run: pytest -m ui --reruns 1 --reruns-delay 5 --html=reports/ui-report.html --self-contained-html --junitxml=reports/ui-results.xml
+        run: pytest -m ui --reruns 1 --reruns-delay 5 --html=reports/ui-report.html --self-contained-html --junitxml=reports/ui-results.xml --alluredir=reports/allure-results/ui
+
+      - name: Generate Allure report
+        if: always()
+        run: npx --yes allure-commandline generate reports/allure-results/api reports/allure-results/ui --clean --single-file -o reports/allure-report
 
       - name: Upload test reports
         if: always()

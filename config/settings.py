@@ -6,7 +6,11 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 BASE_URL = os.getenv("AE_BASE_URL", "https://automationexercise.com").rstrip("/")
 API_BASE_URL = os.getenv("AE_API_BASE_URL", BASE_URL).rstrip("/")
 
+RUNNING_IN_CI = os.getenv("CI", "").lower() == "true"
+HEADLESS = os.getenv("AE_HEADLESS", str(RUNNING_IN_CI)).lower() == "true"
+
 UI_TIMEOUT_MS = int(os.getenv("AE_UI_TIMEOUT_MS", "15000"))
+NAVIGATION_TIMEOUT_MS = int(os.getenv("AE_NAVIGATION_TIMEOUT_MS", "45000"))
 API_TIMEOUT_S = int(os.getenv("AE_API_TIMEOUT_S", "20"))
 OVERLOAD_RETRIES = int(os.getenv("AE_OVERLOAD_RETRIES", "3"))
 OVERLOAD_WAIT_MS = int(os.getenv("AE_OVERLOAD_WAIT_MS", "3000"))
