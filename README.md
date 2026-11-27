@@ -157,7 +157,7 @@ user lookup without an email.
 
 `.github/workflows/tests.yml` runs on pushes to `main`/`master`, on pull requests and on manual dispatch.
 It installs the requirements and Chromium, runs the API suite and the UI suite as separate steps and
-uploads the `reports/` folder (HTML reports + failure screenshots) as the `test-reports` artifact.
+uploads the `reports/` folder (HTML reports, JUnit XML results + failure screenshots) as the `test-reports` artifact.
 The artifact is available from the **Artifacts** section of the workflow run.
 
 ## Notes
