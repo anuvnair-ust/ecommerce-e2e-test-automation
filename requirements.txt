@@ -1,0 +1,7 @@
+playwright==1.65.0
+pytest==9.2.0
+pytest-playwright==0.10.0
+pytest-html==4.2.0
+pytest-rerunfailures==16.7
+requests==2.34.2
+truststore==0.10.5
